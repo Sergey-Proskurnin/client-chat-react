@@ -1,4 +1,5 @@
 import { Component } from 'react';
+import { alert } from '@pnotify/core';
 
 import { socket } from './socket';
 import Message from '../message';
@@ -39,8 +40,17 @@ export default class Chat extends Component {
     this.setState({ currentUser: event.target.value });
   };
 
-  inputName = () => {
+  inputName = e => {
+    e.preventDefault();
     const user = this.state.currentUser;
+    if (Object.values(this.state.users).includes(user)) {
+      alert({
+        title: 'Oh No!',
+        text: `Sorry, the name "${user}" is already taken!`,
+        delay: 5000,
+      });
+      return;
+    }
     if (user.trim().length > 0) {
       this.socket.emit('change:name', user);
       this.setState({ isLogin: true });
@@ -68,50 +78,52 @@ export default class Chat extends Component {
     if (!isLogin) {
       return (
         <main className="form-signin">
-          <h4 className="form-floating mb-3">Пожалуйста представьтесь</h4>
-          <div className="form-floating mb-3">
-            <input
-              className="form-control"
-              value={currentUser}
-              onChange={this.changeName}
-              placeholder="Введите ваш никнейм"
-              id="floatingInput"
-            />
-            <label for="floatingInput">Nickname</label>
-          </div>
-          <button
-            className="w-100 btn btn-lg btn-primary"
-            onClick={this.inputName}
-          >
-            Войти
-          </button>
+          <h4 className="form-floating mb-3">Please, introduce yourself</h4>
+          <form onSubmit={this.inputName}>
+            <div className="form-floating mb-3">
+              <input
+                className="form-control"
+                value={currentUser}
+                onChange={this.changeName}
+                placeholder="Введите ваш никнейм"
+                id="floatingInput"
+              />
+              <label for="floatingInput">Nickname</label>
+            </div>
+            <button className="w-100 btn btn-lg btn-primary" type="submit">
+              Sign in
+            </button>
+          </form>
         </main>
       );
     }
     return (
-      <div className="container">
-        <div className="row align-items-start">
-          <div className="message-list col-md-9">
-            <Send
-              value={message}
-              onChange={this.changeMessage}
-              onSend={this.sendMessage}
-            />
-            <div className="messages">
-              {messages.map((item, key) => (
-                <Message item={item} currentUser={currentUser} key={key} />
-              ))}
+      <>
+        <div className="container">
+          <h1>Welcome {currentUser}</h1>
+          <div className="row align-items-start">
+            <div className="message-list col-md-9">
+              <Send
+                value={message}
+                onChange={this.changeMessage}
+                onSend={this.sendMessage}
+              />
+              <div className="messages">
+                {messages.map((item, key) => (
+                  <Message item={item} currentUser={currentUser} key={key} />
+                ))}
+              </div>
             </div>
+            <ul className="list-group col-md-3">
+              {Object.values(users).map((user, i) => (
+                <li className="list-group-item" key={i}>
+                  {user}
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="list-group col-md-3">
-            {Object.values(users).map((user, i) => (
-              <li className="list-group-item" key={i}>
-                {user}
-              </li>
-            ))}
-          </ul>
         </div>
-      </div>
+      </>
     );
   }
 }

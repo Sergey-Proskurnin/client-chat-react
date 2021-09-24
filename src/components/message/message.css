@@ -1,4 +1,14 @@
-.message-container {
+.message-dark {
   display: flex;
   justify-content: flex-start;
+}
+
+.message-primary {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.list-group-item {
+  color: lightslategray;
+  text-transform: capitalize;
 }
